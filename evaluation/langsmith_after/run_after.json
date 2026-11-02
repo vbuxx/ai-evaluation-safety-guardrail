@@ -1,0 +1,29 @@
+{
+  "phase": "after",
+  "started_at": "2026-11-02T20:19:19.097629+07:00",
+  "finished_at": "2026-11-02T20:19:35.605671+07:00",
+  "transport": "In-process ASGI HTTP; real Gemini API; one sequential request per official scenario; separate synthetic responsiveness probe",
+  "generation_model": "gemini-3.5-flash-lite",
+  "embedding_model": "gemini-embedding-001",
+  "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "platform": "darwin",
+  "source_commit": "33475cfab26c135d793d245c861487b6784843b3",
+  "source_sha256": {
+    "system/app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system/app/main.py": "d002eb645ed5c1909a2a56559120f7b51a373bb9df5af7f0f43adac3663765cf",
+    "system/app/rag.py": "8ef3db138494d66688fd03d65a4a9cfee0e554c83415ef7a57f055d72ecfd722",
+    "system/app/router.py": "3a2e940339b1bebe17d6af554fa936841daf3af31bd1c75bf7c21a2db2d700c2",
+    "system/app/tools.py": "40febbbfa2c0440a8f8c771a3cbc0ced1f11547f05cce5be28dc4e367294b603"
+  },
+  "embedding_token_estimate": "ceil(input characters / 4) per embedding API call; estimate, not billed tokens",
+  "generation_token_source": "Gemini response.usage_metadata; includes thinking tokens in total when present",
+  "memory_measure": "Process lifetime peak RSS after each request; includes evaluation client and imports, not request allocation",
+  "responsiveness_probe": {
+    "method": "Synthetic retrieval=250 ms; generation stubbed; health scheduled after 10 ms; no provider calls",
+    "health_wait_from_schedule_ms": [
+      14.133,
+      15.216,
+      13.79
+    ]
+  }
+}

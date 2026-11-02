@@ -50,10 +50,58 @@ in-process dan jalur RAG mengakses Gemini API sungguhan. TCP Docker diuji terpis
   Penilaian ini bukan skor dari LLM judge. Menjalankan ulang runner mengosongkan
   observasi untuk ditinjau kembali; pengguna sebaiknya menyimpan salinan evidence lama.
 
-LangSmith tidak diaktifkan pada run ini karena kredensialnya tidak dikonfigurasi di
-`system/.env`. Trace SDK lengkap disimpan lokal dalam JSONL; repository tidak
-mengklaim mempunyai dashboard atau experiment LangSmith. Angka token mengacu pada
+Run before/after di atas mempertahankan trace SDK lokal dan hasil pengukuran
+aslinya. Evaluasi tambahan kini terhubung ke LangSmith dan mempunyai experiment,
+dataset, serta feedback yang sudah diverifikasi melalui API. Evidence LangSmith
+berada di `evaluation/langsmith_after/`; pengukuran tambahan dengan tracing tidak
+menggantikan angka before/after sebelumnya. Angka token mengacu pada
 [mekanisme usage Gemini](https://ai.google.dev/gemini-api/docs/tokens).
+
+## Evaluasi tambahan sudah tercatat dan diverifikasi di LangSmith.
+
+- [Experiment LangSmith](https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831) memuat 20 root trace: 12 skenario resmi, tujuh probe safety, dan satu pengulangan query.
+- [Dataset resmi di LangSmith](https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/datasets/5dfc7c06-36cb-46df-8261-ddd708098001) memuat 12 query yang sama beserta catatan expected behavior.
+- Readback server memverifikasi 24 child span: sembilan retrieval, sembilan embedding, dan enam generation. Keenam span LLM memiliki token usage.
+- Dua belas feedback `routing_matches_policy` tersimpan dan dibaca kembali. Seluruhnya bernilai 1 pada run ini.
+
+Feedback tersebut hanya memeriksa kecocokan intent dengan kebijakan routing yang
+dipilih. Nilai 1 tidak berarti jawaban sudah lengkap atau bebas hallucination;
+EVAL-09 tetap merupakan penilaian routing kualitatif, dan EVAL-11 tetap parsial.
+Observasi konten ditinjau manual dan tercantum pada CSV serta laporan di bawah.
+
+Key dibaca dari `system/.env`. Workspace key ini menggunakan region APAC;
+endpoint US/EU menolak akses, sedangkan `https://apac.api.smith.langchain.com`
+berhasil. File contoh menyediakan pengaturan berikut; pengguna menyesuaikan
+endpoint dengan region workspace miliknya:
+
+```dotenv
+LANGSMITH_API_KEY=your_langsmith_api_key_here
+LANGSMITH_ENDPOINT=https://apac.api.smith.langchain.com
+LANGSMITH_PROJECT=assignment5-helpdesk
+```
+
+Kamu menjalankan evaluasi dengan publikasi trace melalui:
+
+```bash
+python evaluation/run_evaluation.py --phase after --langsmith
+```
+
+Mode ini menggunakan Gemini sungguhan, menghubungkan setiap skenario resmi dengan
+example dataset, dan merekam retrieval/embedding/generation sebagai child span.
+Span merekam query, sumber mock, response, metrik, dan token; objek client, header,
+nilai key, serta vektor embedding tidak dijadikan output trace. Verifikasi server
+membandingkan response aktual, kelengkapan span, hubungan dataset, dan feedback;
+pengiriman saja belum dianggap sebagai keberhasilan.
+
+Mode default tanpa flag tetap menyediakan evaluasi lokal. API yang dipanggil di
+luar runner ini belum mendapat instrumentasi LangSmith. Experiment memakai izin
+workspace yang sudah ada; mentor memerlukan akses workspace untuk membuka dashboard.
+Evidence readback dan tautan tiap trace tersedia di
+[evaluation/langsmith_after/langsmith_manifest.json](evaluation/langsmith_after/langsmith_manifest.json),
+sehingga hasil tetap dapat diperiksa dari repository.
+
+Run tambahan selesai pada 2026-11-02T20:23:50.746557+07:00. Source sistem sama dengan
+manifest evaluasi final; file CSV/JSONL terpisah menjaga asal angka pengukuran.
 
 ## Seluruh 12 skenario memiliki respons dan observasi.
 
@@ -240,11 +288,13 @@ PYTHONPATH=system python -m unittest discover -s system/tests -v
 python -m unittest discover -s evaluation -v
 ```
 
-Hasil verifikasi adalah 14 test sistem dan 4 test runner lulus. Test mencakup
+Hasil verifikasi adalah 14 test sistem dan 10 test runner/integrasi lulus. Test mencakup
 31 FAQ, lookup tiket, pembentukan/ranking FAISS, input invalid, guardrail sebelum
 provider, cache embedding, pembangunan index bersamaan, retrieval yang tidak
 memblokir event loop, pelestarian 12 query resmi, pencatatan token, serialisasi
-karakter kontrol, dan perhitungan waktu API yang tumpang tindih.
+karakter kontrol, perhitungan waktu API yang tumpang tindih, mode tracing tanpa key,
+perlindungan dataset yang sudah ada, output trace, readback yang belum lengkap,
+dan feedback bernilai nol ketika routing gagal.
 
 Kamu menjalankan evaluasi sesudah dengan:
 
@@ -290,11 +340,12 @@ menggunakan SHA file sumber di manifest, bukan nama fase yang dapat dipilih beba
 4. Sebelum membuka API publik, tim perlu menambahkan batas request/rate di gateway,
    pemantauan pola penolakan, dan pengujian variasi bahasa dari empat kategori
    framework. Guardrail regex saat ini tidak menggantikan pembatasan akses data.
-5. Jika kredensial LangSmith tersedia, tim dapat menambahkan
-   [trace terstruktur](https://reference.langchain.com/python/langsmith/run_helpers/trace)
-   untuk membandingkan experiment lintas run. Metadata harus disaring dari key dan
-   data pribadi. Saat ini evidence lokal sudah tersedia dan tidak diklaim sebagai
-   trace LangSmith.
+5. Integrasi LangSmith sudah merekam trace dan feedback routing. Tim perlu
+   menambahkan evaluator kesesuaian fakta/cakupan setelah reference jawaban per FAQ
+   disepakati; skor routing tidak menggantikan pemeriksaan isi. SDK LangSmith
+   dikunci ke 0.14.17. API run legacy yang dipakai untuk readback/permalink memiliki
+   jadwal penghentian dukungan 31 Januari 2027; tim perlu menguji migrasi ke
+   `client.runs.query` dan `client.runs.get_url` sebelum memperbarui SDK.
 6. Tim perlu mengunci dependency pada runtime target setelah matriks kompatibilitas
    diuji. Run host menggunakan Python 3.14, sedangkan Docker memakai Python 3.11;
    versi NumPy yang terpasang berbeda. Keduanya lulus pemeriksaan yang dicatat,
@@ -318,7 +369,9 @@ evaluation/
   run_before.json, run_after.json       # Provenance dan probe terkontrol
   docker_smoke_test.json, summary.json
   compound_query_followup.json          # Keberhasilan dan kegagalan tambahan tetap disimpan
-  run_evaluation.py, test_runner.py
+  langsmith_after/                     # Run tambahan dan hasil readback LangSmith
+  run_evaluation.py, langsmith_support.py
+  test_runner.py, test_langsmith_support.py
   sources/                             # Tiga aset asli dari brief
 requirements.txt                       # Dependency runner evaluasi
 README.md

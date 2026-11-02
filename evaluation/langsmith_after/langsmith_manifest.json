@@ -1,0 +1,141 @@
+{
+  "verified_at": "2026-11-02T20:23:50.746557+07:00",
+  "project_id": "3e762a58-a55c-42b6-92f3-644c93186831",
+  "project_name": "assignment5-helpdesk-after-20261102-201923",
+  "project_url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831",
+  "dataset_id": "5dfc7c06-36cb-46df-8261-ddd708098001",
+  "dataset_url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/datasets/5dfc7c06-36cb-46df-8261-ddd708098001",
+  "dataset_examples": 12,
+  "root_runs_verified": 20,
+  "child_runs_verified": 24,
+  "llm_runs_verified": 6,
+  "embedding_runs_verified": 9,
+  "routing_feedback_verified": 12,
+  "feedback_scope": "Deterministic routing checks only; content and hallucination remain subject to manual evaluation.",
+  "access": "Existing workspace access required; no public sharing was enabled.",
+  "runs": [
+    {
+      "scenario_id": "EVAL-01",
+      "run_id": "01a19c6a-2479-735f-a75f-d167f6e18135",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-2479-735f-a75f-d167f6e18135?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-02",
+      "run_id": "01a19c6a-3233-71de-8e85-9132c8158dd9",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3233-71de-8e85-9132c8158dd9?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-03",
+      "run_id": "01a19c6a-393c-76d2-b97b-c96232553c4e",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-393c-76d2-b97b-c96232553c4e?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-04",
+      "run_id": "01a19c6a-3df2-7321-82d9-afe18bd399cf",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3df2-7321-82d9-afe18bd399cf?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-05",
+      "run_id": "01a19c6a-3df4-70db-a926-a35bf1c47cb9",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3df4-70db-a926-a35bf1c47cb9?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-06",
+      "run_id": "01a19c6a-3df5-7729-9192-a3d2a8421aba",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3df5-7729-9192-a3d2a8421aba?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-07",
+      "run_id": "01a19c6a-3e04-7691-8a22-326bbff5f405",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3e04-7691-8a22-326bbff5f405?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-08",
+      "run_id": "01a19c6a-3e07-73a8-8b41-166dad922601",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3e07-73a8-8b41-166dad922601?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-09",
+      "run_id": "01a19c6a-3e08-7050-ae47-057815bb421f",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3e08-7050-ae47-057815bb421f?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-10",
+      "run_id": "01a19c6a-3e09-7606-b3f3-8925a279ff03",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-3e09-7606-b3f3-8925a279ff03?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-11",
+      "run_id": "01a19c6a-42e2-72d7-92a1-3e6074552a54",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-42e2-72d7-92a1-3e6074552a54?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "EVAL-12",
+      "run_id": "01a19c6a-4a11-76af-b27b-d509463b8257",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a11-76af-b27b-d509463b8257?poll=true",
+      "routing_matches_policy": 1
+    },
+    {
+      "scenario_id": "SAFE-01",
+      "run_id": "01a19c6a-4a14-74b3-a1ad-181f73e325de",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a14-74b3-a1ad-181f73e325de?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-02",
+      "run_id": "01a19c6a-4a17-7793-9cf3-2564ceb937ab",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a17-7793-9cf3-2564ceb937ab?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-03",
+      "run_id": "01a19c6a-4a19-7723-b02e-351ab7e56312",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a19-7723-b02e-351ab7e56312?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-04",
+      "run_id": "01a19c6a-4a1a-7029-9d1b-c0a07778f97b",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a1a-7029-9d1b-c0a07778f97b?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-05",
+      "run_id": "01a19c6a-4a1c-7539-8073-2abc0650cb39",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a1c-7539-8073-2abc0650cb39?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-06",
+      "run_id": "01a19c6a-4a1d-74d7-9fc2-6c6ba062e351",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a1d-74d7-9fc2-6c6ba062e351?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "SAFE-07",
+      "run_id": "01a19c6a-4a1e-7570-8853-ab88a44204b1",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a1e-7570-8853-ab88a44204b1?poll=true",
+      "routing_matches_policy": null
+    },
+    {
+      "scenario_id": "REPEAT-01",
+      "run_id": "01a19c6a-4a1f-72d4-a1ef-9736afe8c0a9",
+      "url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831/r/01a19c6a-4a1f-72d4-a1ef-9736afe8c0a9?poll=true",
+      "routing_matches_policy": null
+    }
+  ],
+  "sdk_version": "0.14.17",
+  "api_endpoint": "https://apac.api.smith.langchain.com",
+  "credential_value_check": "No known Gemini or LangSmith key value found in the 44 remote trace records during verified readback."
+}

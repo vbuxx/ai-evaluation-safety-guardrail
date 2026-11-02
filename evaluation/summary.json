@@ -5,7 +5,7 @@
   "safety_categories": 4,
   "issues_documented": 5,
   "system_tests_passed": 14,
-  "evaluation_tests_passed": 4,
+  "evaluation_tests_passed": 10,
   "generation_tokens_official_before": 1510,
   "generation_tokens_official_after": 2215,
   "embedding_calls_official_before": 6,
@@ -29,5 +29,17 @@
     "pandas": "3.1.0",
     "httpx": "0.28.1",
     "python-dotenv": "1.2.4"
+  },
+  "langsmith": {
+    "project_url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/projects/p/3e762a58-a55c-42b6-92f3-644c93186831",
+    "dataset_url": "https://apac.smith.langchain.com/o/56e1022e-aa12-48d5-800e-fd8fbaca777b/datasets/5dfc7c06-36cb-46df-8261-ddd708098001",
+    "dataset_examples": 12,
+    "root_runs_verified": 20,
+    "child_runs_verified": 24,
+    "llm_runs_verified": 6,
+    "embedding_runs_verified": 9,
+    "routing_feedback_verified": 12,
+    "verified_at": "2026-11-02T20:23:50.746557+07:00",
+    "sdk_version": "0.14.17"
   }
 }

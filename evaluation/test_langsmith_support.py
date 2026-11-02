@@ -64,6 +64,7 @@ class LangSmithTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "readback"):
                 support.verify({"client": client, "project": SimpleNamespace(id=uuid4())}, [row])
         client.create_feedback.assert_not_called()
+        self.assertTrue(all(call.kwargs["limit"] <= 100 for call in client.list_runs.call_args_list))
 
     def test_routing_failure_is_saved_as_zero_feedback(self):
         client = Mock()

@@ -89,7 +89,8 @@ def verify(state, rows):
     expected_llms = sum(row["generation_calls"] for row in rows)
     expected_embeddings = sum(row["embedding_calls"] for row in rows)
     for attempt in range(6):
-        runs = list(client.list_runs(project_id=state["project"].id, limit=200))
+        # shortcut: legacy run APIs are supported through 2027-01-31; migrate before upgrading the pinned SDK.
+        runs = list(client.list_runs(project_id=state["project"].id, limit=100))
         by_id = {str(run.id): run for run in runs}
         if (expected_ids <= by_id.keys() and all(run.end_time is not None for run in runs)
                 and sum(run.run_type == "llm" for run in runs) == expected_llms
@@ -110,6 +111,7 @@ def verify(state, rows):
             score = int(row["intent"] == expected_intent)
             feedback = client.create_feedback(
                 remote.id, key="routing_matches_policy", score=score,
+                session_id=state["project"].id,
                 comment=f"Expected intent={expected_intent}; actual={row['intent']}. This checks routing only, not factual correctness.",
             )
             saved = client.read_feedback(feedback.id)

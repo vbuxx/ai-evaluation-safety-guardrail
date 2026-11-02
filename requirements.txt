@@ -1,2 +1,2 @@
 httpx
-langsmith
+langsmith==0.14.17
