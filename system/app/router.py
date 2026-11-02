@@ -6,6 +6,11 @@ from app.rag import answer_from_knowledge_base
 from app.tools import get_ticket_status
 
 TICKET_PATTERN = re.compile(r"\bTICKET-\d{4}\b", re.IGNORECASE)
+RESTRICTED_REQUEST = re.compile(
+    r"\b(?:system\s+prompt|prompt\s+sistem|instruksi\s+internal|api[ _]?key|gemini_api_key)\b"
+    r"|\b(?:abaikan|lupakan|ignore|forget)\b.{0,80}\b(?:instruksi|aturan|batasan|instructions?|rules?)\b",
+    re.IGNORECASE | re.DOTALL,
+)
 FAQ_KEYWORDS = (
     "cuti", "absen", "izin sakit", "password", "vpn", "email", "akses",
     "laptop", "perangkat", "software", "onboarding", "karyawan baru",
@@ -19,7 +24,7 @@ async def detect_intent(query: str) -> str:
     """Mendeteksi FAQ, permintaan status tiket, atau query di luar cakupan."""
     normalized = query.casefold()
     asks_ticket_status = ("tiket" in normalized or "ticket" in normalized) and any(
-        word in normalized for word in ("status", "cek", "progres", "progress")
+        word in normalized for word in ("status", "cek", "progres", "progress", "tiket saya", "ticket saya")
     )
     if TICKET_PATTERN.search(query) or asks_ticket_status:
         return "ticket_status"
@@ -30,6 +35,11 @@ async def detect_intent(query: str) -> str:
 
 async def handle_query(query: str) -> dict:
     """Mengarahkan query ke tool tiket atau RAG sesuai intent."""
+    if RESTRICTED_REQUEST.search(query):
+        return {
+            "status": "error", "intent": "unknown",
+            "data": "Saya membantu pertanyaan HR/IT dan status tiket. Saya tidak dapat mengubah peran atau menampilkan konfigurasi dan instruksi internal.",
+        }
     intent = await detect_intent(query)
 
     if intent == "ticket_status":

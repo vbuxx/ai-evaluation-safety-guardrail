@@ -47,7 +47,8 @@ def instrument():
         def call(*args, **kwargs):
             started = time.perf_counter()
             response = method(*args, **kwargs)
-            entry = {"kind": kind, "elapsed_ms": (time.perf_counter() - started) * 1000}
+            finished = time.perf_counter()
+            entry = {"kind": kind, "elapsed_ms": (finished - started) * 1000, "started_at": started, "finished_at": finished}
             if kind == "embedding":
                 texts = kwargs["contents"]
                 entry["input_characters"] = sum(len(text) for text in texts)
@@ -70,8 +71,8 @@ def instrument():
         result = search(*args, **kwargs)
         trace = TRACE.get()
         if trace is not None:
-            trace["retrieval_ms"] = (time.perf_counter() - started) * 1000
-            trace["retrieved_questions"] = [row["question"] for row in result]
+            trace["retrieval_spans"].append((started, time.perf_counter()))
+            trace["retrieved_questions"].extend(row["question"] for row in result)
         return result
 
     with patch.object(models, "embed_content", wrap(models.embed_content, "embedding")), patch.object(
@@ -80,8 +81,23 @@ def instrument():
         yield
 
 
+def interval_ms(calls):
+    """Count overlapping provider calls once when measuring elapsed time."""
+    if not calls:
+        return 0
+    intervals = sorted((call["started_at"], call["finished_at"]) for call in calls)
+    start, end = intervals[0]
+    total = 0
+    for next_start, next_end in intervals[1:]:
+        if next_start > end:
+            total += end - start
+            start = next_start
+        end = max(end, next_end)
+    return (total + end - start) * 1000
+
+
 async def measure(client, scenario_id, category, query, expected=""):
-    trace = {"calls": [], "retrieval_ms": 0, "retrieved_questions": []}
+    trace = {"calls": [], "retrieval_spans": [], "retrieved_questions": []}
     token = TRACE.set(trace)
     started, cpu = time.perf_counter(), time.process_time()
     try:
@@ -92,7 +108,9 @@ async def measure(client, scenario_id, category, query, expected=""):
     cpu_ms = (time.process_time() - cpu) * 1000
     embeddings = [call for call in trace["calls"] if call["kind"] == "embedding"]
     generations = [call for call in trace["calls"] if call["kind"] == "generation"]
-    embedding_ms = sum(call["elapsed_ms"] for call in embeddings)
+    embedding_ms = interval_ms(embeddings)
+    spans = trace["retrieval_spans"]
+    retrieval_ms = (max(end for _, end in spans) - min(start for start, _ in spans)) * 1000 if spans else 0
     peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     peak_rss_mb = peak_rss / (1024 ** 2 if sys.platform == "darwin" else 1024)
     body = response.json()
@@ -102,9 +120,9 @@ async def measure(client, scenario_id, category, query, expected=""):
         "expected_behavior_note": expected,
         "http_status": response.status_code, "status": body.get("status", "validation_error"),
         "intent": body.get("intent", ""), "actual_response": json.dumps(body, ensure_ascii=False),
-        "latency_ms": round(elapsed, 3), "retrieval_ms": round(trace["retrieval_ms"], 3),
+        "latency_ms": round(elapsed, 3), "retrieval_ms": round(retrieval_ms, 3),
         "embedding_ms": round(embedding_ms, 3),
-        "faiss_and_preparation_ms": round(max(0, trace["retrieval_ms"] - embedding_ms), 3),
+        "faiss_and_preparation_ms": round(max(0, retrieval_ms - embedding_ms), 3),
         "generation_ms": round(sum(call["elapsed_ms"] for call in generations), 3),
         "embedding_calls": len(embeddings), "generation_calls": len(generations),
         "embedding_estimated_tokens": sum(math.ceil(call["input_characters"] / 4) for call in embeddings),

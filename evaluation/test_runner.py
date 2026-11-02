@@ -3,10 +3,19 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from run_evaluation import OUTPUT, TRACE, instrument, rag
+from run_evaluation import OUTPUT, TRACE, instrument, interval_ms, rag
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_parallel_provider_time_is_not_double_counted(self):
+        calls = [
+            {"started_at": 0, "finished_at": 2},
+            {"started_at": 1, "finished_at": 3},
+            {"started_at": 5, "finished_at": 6},
+        ]
+        self.assertEqual(interval_ms(calls), 4000)
+        self.assertEqual(interval_ms([]), 0)
+
     def test_all_official_queries_are_preserved(self):
         with (OUTPUT / "sources/evaluation_test_scenarios.csv").open() as f:
             original = list(csv.DictReader(f))
