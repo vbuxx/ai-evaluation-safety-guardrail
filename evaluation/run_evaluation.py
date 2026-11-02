@@ -20,6 +20,8 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
+from langsmith_support import session as langsmith_session, span as cloud_span, verify as verify_langsmith
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "system"))
 from app import rag
@@ -45,35 +47,52 @@ def instrument():
 
     def wrap(method, kind):
         def call(*args, **kwargs):
-            started = time.perf_counter()
-            response = method(*args, **kwargs)
-            finished = time.perf_counter()
-            entry = {"kind": kind, "elapsed_ms": (finished - started) * 1000, "started_at": started, "finished_at": finished}
-            if kind == "embedding":
-                texts = kwargs["contents"]
-                entry["input_characters"] = sum(len(text) for text in texts)
-                entry["task_type"] = kwargs["config"].task_type
-                entry["billable_characters"] = getattr(response.metadata, "billable_character_count", None)
-            else:
-                usage = response.usage_metadata
-                for key in ["prompt_token_count", "candidates_token_count", "thoughts_token_count", "total_token_count"]:
-                    entry[key] = getattr(usage, key, None)
-            trace = TRACE.get()
-            if trace is not None:
-                trace["calls"].append(entry)
-            return response
+            with cloud_span(
+                f"Gemini {kind}", "embedding" if kind == "embedding" else "llm",
+                inputs={"contents": kwargs["contents"]},
+                metadata={"ls_provider": "google", "ls_model_name": kwargs.get("model")},
+            ) as remote:
+                started = time.perf_counter()
+                response = method(*args, **kwargs)
+                finished = time.perf_counter()
+                entry = {"kind": kind, "elapsed_ms": (finished - started) * 1000, "started_at": started, "finished_at": finished}
+                if kind == "embedding":
+                    texts = kwargs["contents"]
+                    entry["input_characters"] = sum(len(text) for text in texts)
+                    entry["task_type"] = kwargs["config"].task_type
+                    entry["billable_characters"] = getattr(response.metadata, "billable_character_count", None)
+                    if remote:
+                        remote.end(outputs={"embeddings_count": len(response.embeddings)})
+                else:
+                    usage = response.usage_metadata
+                    for key in ["prompt_token_count", "candidates_token_count", "thoughts_token_count", "total_token_count"]:
+                        entry[key] = getattr(usage, key, None)
+                    if remote:
+                        remote.set(usage_metadata={
+                            "input_tokens": entry["prompt_token_count"] or 0,
+                            "output_tokens": (entry["candidates_token_count"] or 0) + (entry["thoughts_token_count"] or 0),
+                            "total_tokens": entry["total_token_count"] or 0,
+                        })
+                        remote.end(outputs={"text": response.text})
+                trace = TRACE.get()
+                if trace is not None:
+                    trace["calls"].append(entry)
+                return response
         return call
 
     search = rag.semantic_search
 
     def traced_search(*args, **kwargs):
-        started = time.perf_counter()
-        result = search(*args, **kwargs)
-        trace = TRACE.get()
-        if trace is not None:
-            trace["retrieval_spans"].append((started, time.perf_counter()))
-            trace["retrieved_questions"].extend(row["question"] for row in result)
-        return result
+        with cloud_span("FAISS retrieval", "retriever", inputs={"query": args[0]}) as remote:
+            started = time.perf_counter()
+            result = search(*args, **kwargs)
+            trace = TRACE.get()
+            if trace is not None:
+                trace["retrieval_spans"].append((started, time.perf_counter()))
+                trace["retrieved_questions"].extend(row["question"] for row in result)
+            if remote:
+                remote.end(outputs={"documents": result})
+            return result
 
     with patch.object(models, "embed_content", wrap(models.embed_content, "embedding")), patch.object(
         models, "generate_content", wrap(models.generate_content, "generation")
@@ -97,46 +116,50 @@ def interval_ms(calls):
 
 
 async def measure(client, scenario_id, category, query, expected=""):
-    trace = {"calls": [], "retrieval_spans": [], "retrieved_questions": []}
-    token = TRACE.set(trace)
-    started, cpu = time.perf_counter(), time.process_time()
-    try:
-        response = await client.post("/ask", json={"query": query})
-    finally:
-        TRACE.reset(token)
-    elapsed = (time.perf_counter() - started) * 1000
-    cpu_ms = (time.process_time() - cpu) * 1000
-    embeddings = [call for call in trace["calls"] if call["kind"] == "embedding"]
-    generations = [call for call in trace["calls"] if call["kind"] == "generation"]
-    embedding_ms = interval_ms(embeddings)
-    spans = trace["retrieval_spans"]
-    retrieval_ms = (max(end for _, end in spans) - min(start for start, _ in spans)) * 1000 if spans else 0
-    peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    peak_rss_mb = peak_rss / (1024 ** 2 if sys.platform == "darwin" else 1024)
-    body = response.json()
-    row = {
-        "scenario_id": scenario_id, "category": category,
-        "query": query if isinstance(query, str) and not any(ord(char) < 32 for char in query) else json.dumps(query, ensure_ascii=False),
-        "expected_behavior_note": expected,
-        "http_status": response.status_code, "status": body.get("status", "validation_error"),
-        "intent": body.get("intent", ""), "actual_response": json.dumps(body, ensure_ascii=False),
-        "latency_ms": round(elapsed, 3), "retrieval_ms": round(retrieval_ms, 3),
-        "embedding_ms": round(embedding_ms, 3),
-        "faiss_and_preparation_ms": round(max(0, retrieval_ms - embedding_ms), 3),
-        "generation_ms": round(sum(call["elapsed_ms"] for call in generations), 3),
-        "embedding_calls": len(embeddings), "generation_calls": len(generations),
-        "embedding_estimated_tokens": sum(math.ceil(call["input_characters"] / 4) for call in embeddings),
-        "prompt_tokens": sum(call.get("prompt_token_count") or 0 for call in generations),
-        "output_tokens": sum(call.get("candidates_token_count") or 0 for call in generations),
-        "thinking_tokens": sum(call.get("thoughts_token_count") or 0 for call in generations),
-        "total_generation_tokens": sum(call.get("total_token_count") or 0 for call in generations),
-        "cpu_ms": round(cpu_ms, 3), "process_peak_rss_mb": round(peak_rss_mb, 3),
-        "response_bytes": len(response.content), "observation": "",
-    }
-    trace.update(row)
-    answer = body.get("data", body.get("detail", ""))
-    print(f"{scenario_id}: HTTP {response.status_code}; {row['intent']}; {elapsed:.0f} ms; {str(answer)[:350]}", flush=True)
-    return row, trace
+    with cloud_span("Helpdesk /ask", inputs={"query": query}, metadata={"scenario_id": scenario_id, "category": category}, scenario_id=scenario_id) as remote:
+        trace = {"calls": [], "retrieval_spans": [], "retrieved_questions": []}
+        token = TRACE.set(trace)
+        started, cpu = time.perf_counter(), time.process_time()
+        try:
+            response = await client.post("/ask", json={"query": query})
+        finally:
+            TRACE.reset(token)
+        elapsed = (time.perf_counter() - started) * 1000
+        cpu_ms = (time.process_time() - cpu) * 1000
+        embeddings = [call for call in trace["calls"] if call["kind"] == "embedding"]
+        generations = [call for call in trace["calls"] if call["kind"] == "generation"]
+        embedding_ms = interval_ms(embeddings)
+        spans = trace["retrieval_spans"]
+        retrieval_ms = (max(end for _, end in spans) - min(start for start, _ in spans)) * 1000 if spans else 0
+        peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        peak_rss_mb = peak_rss / (1024 ** 2 if sys.platform == "darwin" else 1024)
+        body = response.json()
+        row = {
+            "scenario_id": scenario_id, "category": category,
+            "query": query if isinstance(query, str) and not any(ord(char) < 32 for char in query) else json.dumps(query, ensure_ascii=False),
+            "expected_behavior_note": expected,
+            "http_status": response.status_code, "status": body.get("status", "validation_error"),
+            "intent": body.get("intent", ""), "actual_response": json.dumps(body, ensure_ascii=False),
+            "latency_ms": round(elapsed, 3), "retrieval_ms": round(retrieval_ms, 3),
+            "embedding_ms": round(embedding_ms, 3),
+            "faiss_and_preparation_ms": round(max(0, retrieval_ms - embedding_ms), 3),
+            "generation_ms": round(sum(call["elapsed_ms"] for call in generations), 3),
+            "embedding_calls": len(embeddings), "generation_calls": len(generations),
+            "embedding_estimated_tokens": sum(math.ceil(call["input_characters"] / 4) for call in embeddings),
+            "prompt_tokens": sum(call.get("prompt_token_count") or 0 for call in generations),
+            "output_tokens": sum(call.get("candidates_token_count") or 0 for call in generations),
+            "thinking_tokens": sum(call.get("thoughts_token_count") or 0 for call in generations),
+            "total_generation_tokens": sum(call.get("total_token_count") or 0 for call in generations),
+            "cpu_ms": round(cpu_ms, 3), "process_peak_rss_mb": round(peak_rss_mb, 3),
+            "response_bytes": len(response.content), "observation": "",
+        }
+        if remote:
+            row["langsmith_run_id"] = str(remote.id)
+            remote.end(outputs={"response": body}, metadata={"metrics": {key: value for key, value in row.items() if isinstance(value, (int, float))}})
+        trace.update(row)
+        answer = body.get("data", body.get("detail", ""))
+        print(f"{scenario_id}: HTTP {response.status_code}; {row['intent']}; {elapsed:.0f} ms; {str(answer)[:350]}", flush=True)
+        return row, trace
 
 
 async def responsiveness_probe(client):
@@ -169,30 +192,33 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
-async def run(phase):
+async def run(phase, langsmith_enabled=False):
     with (OUTPUT / "evaluation_test_scenarios.csv").open(encoding="utf-8") as f:
         scenarios = list(csv.DictReader(f))
     assert [row["scenario_id"] for row in scenarios] == [f"EVAL-{i:02}" for i in range(1, 13)]
     traces, results, safety = [], [], []
     started = datetime.now(ZoneInfo("Asia/Jakarta")).isoformat()
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://evaluation.local") as client:
-        with instrument():
-            for scenario in scenarios:
-                row, trace = await measure(client, scenario["scenario_id"], scenario["category"], scenario["query"], scenario["expected_behavior_note"])
-                results.append(row)
+    with langsmith_session(scenarios, phase, enabled=langsmith_enabled) as cloud:
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://evaluation.local") as client:
+            with instrument():
+                for scenario in scenarios:
+                    row, trace = await measure(client, scenario["scenario_id"], scenario["category"], scenario["query"], scenario["expected_behavior_note"])
+                    results.append(row)
+                    traces.append(trace)
+                for scenario_id, category, query in SAFETY_CASES:
+                    row, trace = await measure(client, scenario_id, category, query)
+                    safety.append(row)
+                    traces.append(trace)
+                first = scenarios[0]
+                repeat, trace = await measure(client, "REPEAT-01", "Repeated query", first["query"])
                 traces.append(trace)
-            for scenario_id, category, query in SAFETY_CASES:
-                row, trace = await measure(client, scenario_id, category, query)
-                safety.append(row)
-                traces.append(trace)
-            first = scenarios[0]
-            repeat, trace = await measure(client, "REPEAT-01", "Repeated query", first["query"])
-            traces.append(trace)
-        probe = await responsiveness_probe(client)
-    write_csv(OUTPUT / ("evaluation_results.csv" if phase == "before" else "evaluation_results_after.csv"), results)
-    write_csv(OUTPUT / f"safety_results_{phase}.csv", safety)
-    write_csv(OUTPUT / f"repeat_results_{phase}.csv", [repeat])
-    with (OUTPUT / f"traces_{phase}.jsonl").open("w", encoding="utf-8") as f:
+            probe = await responsiveness_probe(client)
+    destination = OUTPUT / f"langsmith_{phase}" if cloud else OUTPUT
+    destination.mkdir(exist_ok=True)
+    write_csv(destination / ("evaluation_results.csv" if phase == "before" else "evaluation_results_after.csv"), results)
+    write_csv(destination / f"safety_results_{phase}.csv", safety)
+    write_csv(destination / f"repeat_results_{phase}.csv", [repeat])
+    with (destination / f"traces_{phase}.jsonl").open("w", encoding="utf-8") as f:
         for trace in traces:
             f.write(json.dumps(trace, ensure_ascii=False) + "\n")
     manifest = {
@@ -207,11 +233,17 @@ async def run(phase):
         "memory_measure": "Process lifetime peak RSS after each request; includes evaluation client and imports, not request allocation",
         "responsiveness_probe": probe,
     }
-    (OUTPUT / f"run_{phase}.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (destination / f"run_{phase}.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Saved {len(results)} official scenarios, {len(safety)} safety checks, repeat query and controlled responsiveness probe ({phase}).", flush=True)
+    if cloud:
+        evidence = verify_langsmith(cloud, results + safety + [repeat])
+        (destination / "langsmith_manifest.json").write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"LangSmith readback verified: {evidence['root_runs_verified']} root traces and {evidence['routing_feedback_verified']} routing feedback records.", flush=True)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase", required=True, choices=["before", "after"])
-    asyncio.run(run(parser.parse_args().phase))
+    parser.add_argument("--langsmith", action="store_true", help="Publish live traces and routing feedback; save evidence separately")
+    args = parser.parse_args()
+    asyncio.run(run(args.phase, langsmith_enabled=args.langsmith))
