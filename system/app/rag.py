@@ -73,8 +73,9 @@ def build_index():
         for row in _df.itertuples(index=False)
     ]
     vectors = _get_embeddings(_documents, "RETRIEVAL_DOCUMENT")
-    _index = faiss.IndexFlatIP(vectors.shape[1])
-    _index.add(vectors)
+    index = faiss.IndexFlatIP(vectors.shape[1])
+    index.add(vectors)
+    _index = index
     return _index
 
 

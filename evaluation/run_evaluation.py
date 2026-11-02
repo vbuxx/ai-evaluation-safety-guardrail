@@ -116,7 +116,7 @@ async def measure(client, scenario_id, category, query, expected=""):
     body = response.json()
     row = {
         "scenario_id": scenario_id, "category": category,
-        "query": query if isinstance(query, str) else json.dumps(query, ensure_ascii=False),
+        "query": query if isinstance(query, str) and not any(ord(char) < 32 for char in query) else json.dumps(query, ensure_ascii=False),
         "expected_behavior_note": expected,
         "http_status": response.status_code, "status": body.get("status", "validation_error"),
         "intent": body.get("intent", ""), "actual_response": json.dumps(body, ensure_ascii=False),

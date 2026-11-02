@@ -1,12 +1,27 @@
+import asyncio
 import csv
+import json
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from run_evaluation import OUTPUT, TRACE, instrument, interval_ms, rag
+import httpx
+
+from run_evaluation import OUTPUT, TRACE, app, instrument, interval_ms, measure, rag
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_control_characters_are_exported_as_readable_json(self):
+        query = "🌀\u0000漢字?!"
+
+        async def request():
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+                return await measure(client, "CONTROL", "Malformed", query)
+
+        row, trace = asyncio.run(request())
+        self.assertNotIn("\u0000", row["query"])
+        self.assertEqual(json.loads(row["query"]), query)
+
     def test_parallel_provider_time_is_not_double_counted(self):
         calls = [
             {"started_at": 0, "finished_at": 2},
