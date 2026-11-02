@@ -1,0 +1,33 @@
+{
+  "official_scenarios_before": 12,
+  "official_scenarios_after": 12,
+  "safety_probes_per_phase": 7,
+  "safety_categories": 4,
+  "issues_documented": 5,
+  "system_tests_passed": 14,
+  "evaluation_tests_passed": 4,
+  "generation_tokens_official_before": 1510,
+  "generation_tokens_official_after": 2215,
+  "embedding_calls_official_before": 6,
+  "embedding_calls_official_after": 9,
+  "controlled_probe_median_ms_before": 258.162,
+  "controlled_probe_median_ms_after": 18.404,
+  "repeated_query_embedding_calls_before": 1,
+  "repeated_query_embedding_calls_after": 0,
+  "provider_calls_safety_before": 4,
+  "provider_calls_safety_after": 0,
+  "cpu_ms_official_before": 235.226,
+  "cpu_ms_official_after": 272.979,
+  "process_peak_rss_mb_before": 139.047,
+  "process_peak_rss_mb_after": 136.875,
+  "host_packages": {
+    "fastapi": "0.162.0",
+    "pydantic": "2.14.2",
+    "google-genai": "2.34.0",
+    "faiss-cpu": "1.15.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "httpx": "0.28.1",
+    "python-dotenv": "1.2.4"
+  }
+}

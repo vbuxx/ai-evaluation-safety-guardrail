@@ -1,0 +1,390 @@
+{
+  "reason": "Retain both observed outcomes; the same retrieved sources did not guarantee a partial answer before prompt clarification.",
+  "initial_optimized": {
+    "manifest": {
+      "phase": "after",
+      "started_at": "2026-11-02T19:22:22.957147+07:00",
+      "finished_at": "2026-11-02T19:22:35.093849+07:00",
+      "transport": "In-process ASGI HTTP; real Gemini API; one sequential request per official scenario; separate synthetic responsiveness probe",
+      "generation_model": "gemini-3.5-flash-lite",
+      "embedding_model": "gemini-embedding-001",
+      "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+      "platform": "darwin",
+      "source_commit": "97a03c1bc7ddee8e0ede6d099b9375f2867ebe2c",
+      "source_sha256": {
+        "system/app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "system/app/main.py": "d002eb645ed5c1909a2a56559120f7b51a373bb9df5af7f0f43adac3663765cf",
+        "system/app/rag.py": "20e99acc216970d0a93d5a5f8d62c0d8649532d740537347106dbbbb0ec8ccc1",
+        "system/app/router.py": "3a2e940339b1bebe17d6af554fa936841daf3af31bd1c75bf7c21a2db2d700c2",
+        "system/app/tools.py": "40febbbfa2c0440a8f8c771a3cbc0ced1f11547f05cce5be28dc4e367294b603"
+      },
+      "embedding_token_estimate": "ceil(input characters / 4) per embedding API call; estimate, not billed tokens",
+      "generation_token_source": "Gemini response.usage_metadata; includes thinking tokens in total when present",
+      "memory_measure": "Process lifetime peak RSS after each request; includes evaluation client and imports, not request allocation",
+      "responsiveness_probe": {
+        "method": "Synthetic retrieval=250 ms; generation stubbed; health scheduled after 10 ms; no provider calls",
+        "health_wait_from_schedule_ms": [
+          12.555,
+          12.023,
+          12.861
+        ]
+      }
+    },
+    "trace": {
+      "calls": [
+        {
+          "kind": "embedding",
+          "elapsed_ms": 440.5223340727389,
+          "started_at": 723871.202259291,
+          "finished_at": 723871.642781625,
+          "input_characters": 57,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 525.4443329758942,
+          "started_at": 723871.20449725,
+          "finished_at": 723871.729941583,
+          "input_characters": 20,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 526.586625026539,
+          "started_at": 723871.205278458,
+          "finished_at": 723871.731865083,
+          "input_characters": 51,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 530.0186250824481,
+          "started_at": 723871.203227583,
+          "finished_at": 723871.733246208,
+          "input_characters": 14,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "generation",
+          "elapsed_ms": 1334.886834025383,
+          "started_at": 723871.734218291,
+          "finished_at": 723873.069105125,
+          "prompt_token_count": 409,
+          "candidates_token_count": 129,
+          "thoughts_token_count": null,
+          "total_token_count": 538
+        }
+      ],
+      "retrieval_spans": [
+        [
+          723871.202129083,
+          723871.644462
+        ],
+        [
+          723871.204459541,
+          723871.730931875
+        ],
+        [
+          723871.205243375,
+          723871.732384125
+        ],
+        [
+          723871.20318275,
+          723871.73368775
+        ]
+      ],
+      "retrieved_questions": [
+        "Bagaimana kebijakan penggunaan cuti melahirkan/paternity leave?",
+        "Bagaimana cara mengajukan permintaan laptop baru?",
+        "Apa saja yang perlu disiapkan karyawan baru di hari pertama?",
+        "Bagaimana cara reset password VPN perusahaan?"
+      ],
+      "scenario_id": "EVAL-11",
+      "category": "Beban Panjang",
+      "query": "Tolong jelaskan sedetail-detailnya seluruh kebijakan cuti, reset password, permintaan perangkat, dan proses onboarding sekaligus dalam satu jawaban.",
+      "expected_behavior_note": "Amati waktu respons dan apakah jawaban tetap relevan atau melebar ke luar konteks",
+      "http_status": 200,
+      "status": "success",
+      "intent": "faq",
+      "actual_response": "{\"status\": \"success\", \"intent\": \"faq\", \"data\": \"* **Cuti:** Cuti melahirkan diberikan selama 3 bulan sesuai regulasi, sedangkan cuti paternity diberikan 2 hari kerja bagi karyawan pria.\\n* **Reset Password:** Reset password VPN dapat dilakukan mandiri melalui portal self-service IT atau dengan menghubungi tim IT Support jika akun terkunci.\\n* **Permintaan Perangkat:** Permintaan laptop baru diajukan melalui tiket IT dengan menyertakan justifikasi kebutuhan serta memerlukan persetujuan manajer dan tim IT Asset.\\n* **Onboarding:** Karyawan baru perlu membawa dokumen identitas asli untuk verifikasi pada hari pertama serta akan menerima akun email dan akses sistem.\"}",
+      "latency_ms": 1869.963,
+      "retrieval_ms": 531.559,
+      "embedding_ms": 530.987,
+      "faiss_and_preparation_ms": 0.572,
+      "generation_ms": 1334.887,
+      "embedding_calls": 4,
+      "generation_calls": 1,
+      "embedding_estimated_tokens": 37,
+      "prompt_tokens": 409,
+      "output_tokens": 129,
+      "thinking_tokens": 0,
+      "total_generation_tokens": 538,
+      "cpu_ms": 50.9,
+      "process_peak_rss_mb": 139.75,
+      "response_bytes": 666,
+      "observation": ""
+    }
+  },
+  "before_prompt_clarification": {
+    "manifest": {
+      "phase": "after",
+      "started_at": "2026-11-02T19:33:38.190125+07:00",
+      "finished_at": "2026-11-02T19:33:49.067627+07:00",
+      "transport": "In-process ASGI HTTP; real Gemini API; one sequential request per official scenario; separate synthetic responsiveness probe",
+      "generation_model": "gemini-3.5-flash-lite",
+      "embedding_model": "gemini-embedding-001",
+      "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+      "platform": "darwin",
+      "source_commit": "5e2a2a1d7148dd1433c7ff8d30032d11a8679995",
+      "source_sha256": {
+        "system/app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "system/app/main.py": "d002eb645ed5c1909a2a56559120f7b51a373bb9df5af7f0f43adac3663765cf",
+        "system/app/rag.py": "4f2b5f4601dca767ae70705dbcaa38163b0313eafd14562378c65c5507a38386",
+        "system/app/router.py": "3a2e940339b1bebe17d6af554fa936841daf3af31bd1c75bf7c21a2db2d700c2",
+        "system/app/tools.py": "40febbbfa2c0440a8f8c771a3cbc0ced1f11547f05cce5be28dc4e367294b603"
+      },
+      "embedding_token_estimate": "ceil(input characters / 4) per embedding API call; estimate, not billed tokens",
+      "generation_token_source": "Gemini response.usage_metadata; includes thinking tokens in total when present",
+      "memory_measure": "Process lifetime peak RSS after each request; includes evaluation client and imports, not request allocation",
+      "responsiveness_probe": {
+        "method": "Synthetic retrieval=250 ms; generation stubbed; health scheduled after 10 ms; no provider calls",
+        "health_wait_from_schedule_ms": [
+          14.316,
+          14.474,
+          11.6
+        ]
+      }
+    },
+    "trace": {
+      "calls": [
+        {
+          "kind": "embedding",
+          "elapsed_ms": 460.2338329423219,
+          "started_at": 724545.707407,
+          "finished_at": 724546.167640833,
+          "input_characters": 57,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 522.520957980305,
+          "started_at": 724545.7084215,
+          "finished_at": 724546.230942458,
+          "input_characters": 14,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 534.5296669984236,
+          "started_at": 724545.709462208,
+          "finished_at": 724546.243991875,
+          "input_characters": 20,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 533.5801669862121,
+          "started_at": 724545.711417041,
+          "finished_at": 724546.244997208,
+          "input_characters": 51,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "generation",
+          "elapsed_ms": 821.0717911133543,
+          "started_at": 724546.245593375,
+          "finished_at": 724547.066665166,
+          "prompt_token_count": 409,
+          "candidates_token_count": 9,
+          "thoughts_token_count": null,
+          "total_token_count": 418
+        }
+      ],
+      "retrieval_spans": [
+        [
+          724545.707333833,
+          724546.168092916
+        ],
+        [
+          724545.708358625,
+          724546.231363041
+        ],
+        [
+          724545.709430458,
+          724546.244348166
+        ],
+        [
+          724545.7113715,
+          724546.245259291
+        ]
+      ],
+      "retrieved_questions": [
+        "Bagaimana kebijakan penggunaan cuti melahirkan/paternity leave?",
+        "Bagaimana cara reset password VPN perusahaan?",
+        "Bagaimana cara mengajukan permintaan laptop baru?",
+        "Apa saja yang perlu disiapkan karyawan baru di hari pertama?"
+      ],
+      "scenario_id": "EVAL-11",
+      "category": "Beban Panjang",
+      "query": "Tolong jelaskan sedetail-detailnya seluruh kebijakan cuti, reset password, permintaan perangkat, dan proses onboarding sekaligus dalam satu jawaban.",
+      "expected_behavior_note": "Amati waktu respons dan apakah jawaban tetap relevan atau melebar ke luar konteks",
+      "http_status": 200,
+      "status": "success",
+      "intent": "faq",
+      "actual_response": "{\"status\": \"success\", \"intent\": \"faq\", \"data\": \"Informasi tersebut tidak tersedia di knowledge base.\"}",
+      "latency_ms": 1362.339,
+      "retrieval_ms": 537.925,
+      "embedding_ms": 537.59,
+      "faiss_and_preparation_ms": 0.335,
+      "generation_ms": 821.072,
+      "embedding_calls": 4,
+      "generation_calls": 1,
+      "embedding_estimated_tokens": 37,
+      "prompt_tokens": 409,
+      "output_tokens": 9,
+      "thinking_tokens": 0,
+      "total_generation_tokens": 418,
+      "cpu_ms": 45.456,
+      "process_peak_rss_mb": 138.891,
+      "response_bytes": 97,
+      "observation": ""
+    }
+  },
+  "after_prompt_clarification": {
+    "manifest": {
+      "phase": "after",
+      "started_at": "2026-11-02T19:36:04.018274+07:00",
+      "finished_at": "2026-11-02T19:36:25.940046+07:00",
+      "transport": "In-process ASGI HTTP; real Gemini API; one sequential request per official scenario; separate synthetic responsiveness probe",
+      "generation_model": "gemini-3.5-flash-lite",
+      "embedding_model": "gemini-embedding-001",
+      "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+      "platform": "darwin",
+      "source_commit": "413ae61b5adaa35b0c484b38dc21cf5de0f172a7",
+      "source_sha256": {
+        "system/app/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "system/app/main.py": "d002eb645ed5c1909a2a56559120f7b51a373bb9df5af7f0f43adac3663765cf",
+        "system/app/rag.py": "8ef3db138494d66688fd03d65a4a9cfee0e554c83415ef7a57f055d72ecfd722",
+        "system/app/router.py": "3a2e940339b1bebe17d6af554fa936841daf3af31bd1c75bf7c21a2db2d700c2",
+        "system/app/tools.py": "40febbbfa2c0440a8f8c771a3cbc0ced1f11547f05cce5be28dc4e367294b603"
+      },
+      "embedding_token_estimate": "ceil(input characters / 4) per embedding API call; estimate, not billed tokens",
+      "generation_token_source": "Gemini response.usage_metadata; includes thinking tokens in total when present",
+      "memory_measure": "Process lifetime peak RSS after each request; includes evaluation client and imports, not request allocation",
+      "responsiveness_probe": {
+        "method": "Synthetic retrieval=250 ms; generation stubbed; health scheduled after 10 ms; no provider calls",
+        "health_wait_from_schedule_ms": [
+          41.603,
+          18.404,
+          13.263
+        ]
+      }
+    },
+    "trace": {
+      "calls": [
+        {
+          "kind": "embedding",
+          "elapsed_ms": 490.0513750035316,
+          "started_at": 724701.95490425,
+          "finished_at": 724702.444955625,
+          "input_characters": 14,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 583.716084016487,
+          "started_at": 724701.957284166,
+          "finished_at": 724702.54100025,
+          "input_characters": 57,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 588.9246660517529,
+          "started_at": 724701.9584685,
+          "finished_at": 724702.547393166,
+          "input_characters": 51,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "embedding",
+          "elapsed_ms": 591.0315410001203,
+          "started_at": 724701.9577765,
+          "finished_at": 724702.548808041,
+          "input_characters": 20,
+          "task_type": "RETRIEVAL_QUERY",
+          "billable_characters": null
+        },
+        {
+          "kind": "generation",
+          "elapsed_ms": 1241.229125065729,
+          "started_at": 724702.549570208,
+          "finished_at": 724703.790799333,
+          "prompt_token_count": 444,
+          "candidates_token_count": 155,
+          "thoughts_token_count": null,
+          "total_token_count": 599
+        }
+      ],
+      "retrieval_spans": [
+        [
+          724701.954801958,
+          724702.452571625
+        ],
+        [
+          724701.957257541,
+          724702.543349291
+        ],
+        [
+          724701.958445166,
+          724702.547967208
+        ],
+        [
+          724701.957755791,
+          724702.549072791
+        ]
+      ],
+      "retrieved_questions": [
+        "Bagaimana cara reset password VPN perusahaan?",
+        "Bagaimana kebijakan penggunaan cuti melahirkan/paternity leave?",
+        "Apa saja yang perlu disiapkan karyawan baru di hari pertama?",
+        "Bagaimana cara mengajukan permintaan laptop baru?"
+      ],
+      "scenario_id": "EVAL-11",
+      "category": "Beban Panjang",
+      "query": "Tolong jelaskan sedetail-detailnya seluruh kebijakan cuti, reset password, permintaan perangkat, dan proses onboarding sekaligus dalam satu jawaban.",
+      "expected_behavior_note": "Amati waktu respons dan apakah jawaban tetap relevan atau melebar ke luar konteks",
+      "http_status": 200,
+      "status": "success",
+      "intent": "faq",
+      "actual_response": "{\"status\": \"success\", \"intent\": \"faq\", \"data\": \"Berikut adalah ringkasan parsial berdasarkan informasi yang tersedia di *knowledge base*:\\n\\n* **Kebijakan Cuti:** Cuti melahirkan diberikan selama 3 bulan sesuai regulasi, sedangkan cuti *paternity* untuk karyawan pria diberikan selama 2 hari kerja.\\n* **Reset Password:** Password VPN dapat direset secara mandiri melalui portal self-service IT atau dengan menghubungi tim IT Support jika akun terkunci.\\n* **Permintaan Perangkat:** Pengajuan laptop baru dilakukan melalui tiket IT dengan menyertakan justifikasi kebutuhan serta memerlukan persetujuan manajer dan tim IT Asset.\\n* **Proses Onboarding:** Karyawan baru perlu membawa dokumen identitas asli untuk verifikasi di hari pertama, serta akan menerima akun email dan akses sistem.\"}",
+      "latency_ms": 1851.745,
+      "retrieval_ms": 594.271,
+      "embedding_ms": 593.904,
+      "faiss_and_preparation_ms": 0.367,
+      "generation_ms": 1241.229,
+      "embedding_calls": 4,
+      "generation_calls": 1,
+      "embedding_estimated_tokens": 37,
+      "prompt_tokens": 444,
+      "output_tokens": 155,
+      "thinking_tokens": 0,
+      "total_generation_tokens": 599,
+      "cpu_ms": 64.138,
+      "process_peak_rss_mb": 136.875,
+      "response_bytes": 784,
+      "observation": ""
+    }
+  }
+}

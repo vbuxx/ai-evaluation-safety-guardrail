@@ -119,10 +119,14 @@ Jalankan automated test tanpa memakai Gemini API:
 python -m unittest discover -s tests -v
 ```
 
-Tujuh automated test mencakup routing seluruh 31 pertanyaan knowledge base serta
+Empat belas automated test mencakup routing seluruh 31 pertanyaan knowledge base serta
 pembuatan index dan pencarian FAISS menggunakan embedding buatan, sehingga tidak
 memerlukan API key. Pertanyaan komunikasi internal juga tercakup untuk mencegah
 regresi router yang sebelumnya mengembalikan intent `unknown`.
+
+Versi assignment 5 menambahkan test klarifikasi tiket, guardrail, error validasi,
+cache embedding, retrieval paralel yang tidak memblokir event loop, dan query
+beberapa topik. Laporan evaluasi before/after tersedia di [README utama](../README.md).
 
 Enam skenario berikut diuji melalui endpoint `/ask` pada 2 November 2026 dengan
 Gemini API aktif. Seluruh request menerima HTTP 200 dan diarahkan sesuai harapan.
