@@ -1,0 +1,6 @@
+,issue_id,issue_category,description,evidence_before,root_cause_hypothesis,action_taken,evidence_after,improvement_summary
+0,ISSUE-01,Relevansi/Hallucination,,,,,,
+1,ISSUE-02,Latency,,,,,,
+2,ISSUE-03,Resource/Token Usage,,,,,,
+3,ISSUE-04,Safety/Guardrail,,,,,,
+4,ISSUE-05,Error Handling,,,,,,
